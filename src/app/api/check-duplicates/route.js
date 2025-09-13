@@ -1,6 +1,6 @@
 // File: src/app/api/check-duplicates/route.js
 import { NextResponse } from 'next/server';
-import { db } from '../../../../../firebase-admin.config';
+import { db } from '@/../firebase-admin.config';
 
 export async function POST(request) {
   try {

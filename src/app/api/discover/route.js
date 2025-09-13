@@ -1,6 +1,6 @@
 // File: src/app/api/discover/route.js
 import { NextResponse } from 'next/server';
-import { db } from '../../../../../firebase-admin.config';
+import { db } from '@/../firebase-admin.config';
 import { sources } from '../../../../scripts/sources';
 import { findPotentialSpots } from '../../../../scripts/discovery-agent';
 import { geocodeSpots, isWithinLagosBounds } from '../../../../scripts/geocoding';
