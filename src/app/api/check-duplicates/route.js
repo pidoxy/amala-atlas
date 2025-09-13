@@ -1,26 +1,26 @@
+// File: src/app/api/check-duplicates/route.js
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { db } from '../../../../../firebase-admin.config';
 
 export async function POST(request) {
   try {
     const { name } = await request.json();
-
     if (!name || name.trim().length < 3) {
-      // Don't check if the name is too short
-      return NextResponse.json({ isDuplicate: false, message: 'Name too short' });
+      return NextResponse.json({ isDuplicate: false });
     }
-
-    const dbPath = path.join(process.cwd(), 'db.json');
-    const dbJson = await fs.readFile(dbPath, 'utf8');
-    const db = JSON.parse(dbJson);
-
-    // Combine both approved and pending spots into one list for a thorough check
-    const allSpots = [...db.spots, ...db.pending_spots];
 
     const searchTerm = name.toLowerCase().trim();
 
-    // Find the first spot that has a similar name
+    // Fetch documents from both collections in parallel
+    const spotsPromise = db.collection('spots').get();
+    const pendingSpotsPromise = db.collection('pending_spots').get();
+    const [spotsSnapshot, pendingSpotsSnapshot] = await Promise.all([spotsPromise, pendingSpotsPromise]);
+
+    const allSpots = [
+      ...spotsSnapshot.docs.map(doc => doc.data()),
+      ...pendingSpotsSnapshot.docs.map(doc => doc.data())
+    ];
+
     const potentialDuplicate = allSpots.find(spot => 
       spot.name.toLowerCase().includes(searchTerm)
     );
@@ -33,8 +33,8 @@ export async function POST(request) {
     }
 
     return NextResponse.json({ isDuplicate: false });
-
   } catch (error) {
-    return NextResponse.json({ message: 'Error checking duplicates', error: error.message }, { status: 500 });
+    console.error('[API Check-Duplicates] Error:', error);
+    return NextResponse.json({ message: 'Error checking duplicates' }, { status: 500 });
   }
 }

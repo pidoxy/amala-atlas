@@ -54,9 +54,33 @@
       "rating": 4.2,
       "review_count": 150,
       "image_url": "https://i.imgur.com/another-image.jpg"
-    }
-  ],
-  "pending_spots": [
+    },
+    {
+      "id": 1757758390468.04,
+      "name": "Olaiya",
+      "address": "📍SurulereAnyone who has lived in Lagos for a long time has probably heard of the famed Olaiya bukka in Surulere. This popular establishment has gained popularity for its sizzling hot and flavorful Amala.",
+      "description": "📍SurulereAnyone who has lived in Lagos for a long time has probably heard of the famed Olaiya bukka in Surulere. This popular establishment has gained popularity for its sizzling hot and flavorful Am",
+      "image_url": "",
+      "rating": 0,
+      "review_count": 0,
+      "is_open": true,
+      "category": [
+        "Dine-in",
+        "Takeaway"
+      ],
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
+      "geocoded_address": null,
+      "geocoding_confidence": 0,
+      "geocoding_status": "failed",
+      "source": "TheLagosWeekender",
+      "source_url": "https://thelagosweekender.com/where-to-eat-in-lagos-amala-joints-edition/",
+      "scraped_at": "2025-09-13T10:12:28.506Z",
+      "status": "pending",
+      "created_at": "2025-09-13T10:13:10.468Z"
+    },
     {
       "id": 1757758390468.4873,
       "name": "Finding the best Amala spots in Lagos",
@@ -70,7 +94,10 @@
         "Dine-in",
         "Takeaway"
       ],
-      "location": null,
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
       "geocoded_address": null,
       "geocoding_confidence": 0,
       "geocoding_status": "failed",
@@ -93,36 +120,16 @@
         "Dine-in",
         "Takeaway"
       ],
-      "location": null,
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
       "geocoded_address": null,
       "geocoding_confidence": 0,
       "geocoding_status": "failed",
       "source": "FoodieInLagos",
       "source_url": "https://foodieinlagos.com/finding-the-best-amala-spots-in-lagos/",
       "scraped_at": "2025-09-13T10:12:28.195Z",
-      "status": "pending",
-      "created_at": "2025-09-13T10:13:10.468Z"
-    },
-    {
-      "id": 1757758390468.04,
-      "name": "Olaiya",
-      "address": "📍SurulereAnyone who has lived in Lagos for a long time has probably heard of the famed Olaiya bukka in Surulere. This popular establishment has gained popularity for its sizzling hot and flavorful Amala.",
-      "description": "📍SurulereAnyone who has lived in Lagos for a long time has probably heard of the famed Olaiya bukka in Surulere. This popular establishment has gained popularity for its sizzling hot and flavorful Am",
-      "image_url": "",
-      "rating": 0,
-      "review_count": 0,
-      "is_open": true,
-      "category": [
-        "Dine-in",
-        "Takeaway"
-      ],
-      "location": null,
-      "geocoded_address": null,
-      "geocoding_confidence": 0,
-      "geocoding_status": "failed",
-      "source": "TheLagosWeekender",
-      "source_url": "https://thelagosweekender.com/where-to-eat-in-lagos-amala-joints-edition/",
-      "scraped_at": "2025-09-13T10:12:28.506Z",
       "status": "pending",
       "created_at": "2025-09-13T10:13:10.468Z"
     },
@@ -139,7 +146,10 @@
         "Dine-in",
         "Takeaway"
       ],
-      "location": null,
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
       "geocoded_address": null,
       "geocoding_confidence": 0,
       "geocoding_status": "failed",
@@ -162,7 +172,10 @@
         "Dine-in",
         "Takeaway"
       ],
-      "location": null,
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
       "geocoded_address": null,
       "geocoding_confidence": 0,
       "geocoding_status": "failed",
@@ -185,7 +198,10 @@
         "Dine-in",
         "Takeaway"
       ],
-      "location": null,
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
       "geocoded_address": null,
       "geocoding_confidence": 0,
       "geocoding_status": "failed",
@@ -208,7 +224,10 @@
         "Dine-in",
         "Takeaway"
       ],
-      "location": null,
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
       "geocoded_address": null,
       "geocoding_confidence": 0,
       "geocoding_status": "failed",
@@ -231,7 +250,10 @@
         "Dine-in",
         "Takeaway"
       ],
-      "location": null,
+      "location": {
+        "lat": 6.5244,
+        "lng": 3.3792
+      },
       "geocoded_address": null,
       "geocoding_confidence": 0,
       "geocoding_status": "failed",
@@ -241,5 +263,6 @@
       "status": "pending",
       "created_at": "2025-09-13T10:13:10.468Z"
     }
-  ]
+  ],
+  "pending_spots": []
 }
