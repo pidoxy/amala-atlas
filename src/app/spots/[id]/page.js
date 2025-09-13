@@ -5,8 +5,14 @@ import ReviewsList from '../../../components/ReviewsList';
 
 // This function fetches the data for a single spot
 async function getSpotDetails(id) {
-  // Use the live URL in a real deployment
-  const res = await fetch(`http://localhost:3000/api/spots/${id}`, { cache: 'no-store' });
+  // Use relative URL for production deployment
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}` 
+    : process.env.NODE_ENV === 'production' 
+      ? 'https://amala-atlas-oon3.vercel.app'
+      : 'http://localhost:3000';
+  
+  const res = await fetch(`${baseUrl}/api/spots/${id}`, { cache: 'no-store' });
   if (!res.ok) return null;
   return res.json();
 }

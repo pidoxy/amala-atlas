@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ReviewCard from './ReviewCard';
 import ReviewForm from './ReviewForm';
 
@@ -9,7 +9,7 @@ export default function ReviewsList({ spotId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/reviews?spot_id=${spotId}`);
@@ -25,11 +25,11 @@ export default function ReviewsList({ spotId }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [spotId]);
 
   useEffect(() => {
     fetchReviews();
-  }, [spotId]);
+  }, [fetchReviews]);
 
   const handleReviewSubmitted = () => {
     // Refresh reviews when a new one is submitted
