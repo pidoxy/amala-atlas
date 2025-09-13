@@ -1,103 +1,134 @@
-import Image from "next/image";
+// File: src/app/page.js
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import AmalaMap from '../components/Map';
+import Link from 'next/link';
+import SpotDetails from '../components/SpotDetails';
+import ThemeToggle from '../components/ThemeToggle'; // Assuming you have this component
+
+export default function HomePage() {
+  const [spots, setSpots] = useState([]); // Holds the original list of all spots from the API
+  const [filteredSpots, setFilteredSpots] = useState([]); // The list of spots to actually display on the map
+  const [selectedSpot, setSelectedSpot] = useState(null);
+
+  // NEW: State to manage our active filters
+  const [activeFilters, setActiveFilters] = useState({
+    openNow: false,
+    serviceType: 'all', // can be 'all', 'dine-in', or 'takeaway'
+  });
+
+  // 1. Fetch all data once when the component first loads
+  useEffect(() => {
+    async function getSpots() {
+      const res = await fetch('/api/spots');
+      const data = await res.json();
+      setSpots(data);
+    }
+    getSpots();
+  }, []);
+
+  // 2. NEW: This powerful effect runs whenever the filters OR the original spot list change.
+  // It recalculates the `filteredSpots` list.
+  useEffect(() => {
+    let result = spots;
+
+    // Apply "Open Now" filter if it's active
+    if (activeFilters.openNow) {
+      result = result.filter(spot => spot.is_open === true);
+    }
+
+    // Apply "Service Type" filter if it's not 'all'
+    if (activeFilters.serviceType !== 'all') {
+      result = result.filter(spot => 
+        spot.category.map(c => c.toLowerCase()).includes(activeFilters.serviceType)
+      );
+    }
+
+    setFilteredSpots(result);
+
+    // Logic to handle the selected spot when filters change
+    if (result.length > 0) {
+      const isSelectedSpotStillVisible = result.find(s => s.id === selectedSpot?.id);
+      setSelectedSpot(isSelectedSpotStillVisible ? selectedSpot : result[0]);
+    } else {
+      setSelectedSpot(null); // If no spots match, deselect everything
+    }
+  }, [spots, activeFilters]); // This effect depends on these values
+
+  // 3. NEW: A handler function to update the filter state when a button is clicked
+  const handleFilterChange = (filterName, value) => {
+    setActiveFilters(prevFilters => {
+      const currentValue = prevFilters[filterName];
+      // This allows toggling: clicking an active filter deactivates it
+      const newValue = currentValue === value ? (filterName === 'openNow' ? false : 'all') : value;
+      return { ...prevFilters, [filterName]: newValue };
+    });
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="container mx-auto px-4 py-8 bg-background text-foreground min-h-screen">
+      {/* Header */}
+      <header className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-foreground">Amala Atlas</h1>
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <Link href="/add" className="bg-primary text-primary-foreground font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg">
+            + Add a Spot
+          </Link>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+      </header>
+      
+      <div className="relative mb-6">
+        {/* Search and filter section with working onClick handlers */}
+        <div className="absolute top-4 left-4 z-10 bg-card/95 backdrop-blur-sm p-4 shadow-xl rounded-lg w-[calc(100%-2rem)] max-w-sm border border-border">
+          <input 
+            type="text" 
+            placeholder="Find Amala near you" 
+            className="w-full px-3 py-2 bg-background text-foreground border border-input rounded-md focus:ring-2 focus:ring-ring focus:border-ring transition-all duration-200 placeholder:text-muted-foreground"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <button 
+              onClick={() => handleFilterChange('openNow', true)}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${activeFilters.openNow ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'}`}
+            >
+              Open Now
+            </button>
+            <button 
+              onClick={() => handleFilterChange('serviceType', 'dine-in')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${activeFilters.serviceType === 'dine-in' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'}`}
+            >
+              Dine-in
+            </button>
+            <button 
+              onClick={() => handleFilterChange('serviceType', 'takeaway')}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 ${activeFilters.serviceType === 'takeaway' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'}`}
+            >
+              Takeaway
+            </button>
+            <button className="px-3 py-1.5 bg-secondary text-secondary-foreground rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors duration-200 opacity-50 cursor-not-allowed">
+              Price
+            </button>
+          </div>
+        </div>
+
+        {/* The Map Component now correctly receives the FILTERED spots list */}
+        <AmalaMap 
+          spots={filteredSpots} 
+          selectedSpot={selectedSpot}
+          onMarkerClick={setSelectedSpot} 
+        />
+      </div>
+
+      {/* Conditionally render details or a "not found" message */}
+      {selectedSpot ? (
+        <SpotDetails spot={selectedSpot} />
+      ) : (
+        <div className="text-center py-10">
+          <h2 className="text-2xl font-bold text-neutral-700">No spots found</h2>
+          <p className="text-neutral-500">Try adjusting your filters to find more great Amala!</p>
+        </div>
+      )}
+    </main>
   );
 }

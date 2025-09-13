@@ -1,4 +1,18 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {};
+// File: next.config.js
 
-export default nextConfig;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    // Add this 'images' block
+    images: {
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'i.imgur.com',
+          port: '',
+          pathname: '/**',
+        },
+      ],
+    },
+  };
+  
+  export default nextConfig;
