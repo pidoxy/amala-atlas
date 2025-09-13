@@ -3,6 +3,12 @@ import { db } from '@/../firebase-admin.config';
 
 export async function GET() {
     try {
+        // Check if Firebase is initialized
+        if (!db) {
+            console.error('Firebase not initialized - missing environment variables');
+            return NextResponse.json({ message: 'Database not available' }, { status: 503 });
+        }
+
         // Get all spots
         const spotsSnapshot = await db.collection('spots').get();
         const spots = spotsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

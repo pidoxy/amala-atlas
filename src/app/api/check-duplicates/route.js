@@ -4,6 +4,12 @@ import { db } from '@/../firebase-admin.config';
 
 export async function POST(request) {
   try {
+    // Check if Firebase is initialized
+    if (!db) {
+      console.error('Firebase not initialized - missing environment variables');
+      return NextResponse.json({ message: 'Database not available' }, { status: 503 });
+    }
+
     const { name } = await request.json();
     if (!name || name.trim().length < 3) {
       return NextResponse.json({ isDuplicate: false });
