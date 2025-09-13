@@ -2,11 +2,13 @@
   "name": "amala-atlas",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import-spots": "node scripts/import-amala-spots.js"
   },
   "dependencies": {
     "@auth/firebase-adapter": "^2.10.0",
