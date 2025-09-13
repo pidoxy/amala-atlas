@@ -1,7 +1,7 @@
 // File: src/components/Map.js
 "use client";
 
-import { APIProvider, Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
+import { Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 
 export default function AmalaMap({ spots, selectedSpot, onMarkerClick }) {
   const position = { lat: 6.5244, lng: 3.3792 }; // Center of Lagos
@@ -14,7 +14,7 @@ export default function AmalaMap({ spots, selectedSpot, onMarkerClick }) {
   );
 
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
+
       <div style={{ height: "60vh", width: "100%", borderRadius: '12px', overflow: 'hidden' }}>
         <Map 
           defaultCenter={position} 
@@ -39,6 +39,5 @@ export default function AmalaMap({ spots, selectedSpot, onMarkerClick }) {
           ))}
         </Map>
       </div>
-    </APIProvider>
   );
 }

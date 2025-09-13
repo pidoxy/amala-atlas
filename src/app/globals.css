@@ -88,10 +88,25 @@ button, .btn {
   transition: all 0.2s ease;
 }
 
+/* Override for star rating buttons */
+button.star-rating {
+  background-color: transparent !important;
+  color: inherit !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 button:hover, .btn:hover {
   background-color: var(--primary);
   opacity: 0.9;
   transform: translateY(-1px);
+}
+
+button.star-rating:hover {
+  background-color: transparent !important;
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
 }
 
 button:disabled, .btn:disabled {
