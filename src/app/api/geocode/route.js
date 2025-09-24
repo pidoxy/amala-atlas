@@ -1,8 +1,7 @@
 // File: src/app/api/geocode/route.js
 import { NextResponse } from 'next/server';
-import { geocodeAddress, isWithinLagosBounds } from '@/../scripts/geocoding';
-import fs from 'fs/promises';
-import path from 'path';
+import { geocodeAddress } from '@/../scripts/geocoding';
+import { db } from '@/../firebase-admin.config';
 
 export async function POST(request) {
   try {
@@ -25,32 +24,14 @@ export async function POST(request) {
       });
     }
 
-    // Validate coordinates are within Lagos bounds
-    if (!isWithinLagosBounds(coordinates.lat, coordinates.lng)) {
-      return NextResponse.json({ 
-        message: 'Address is outside Lagos bounds',
-        success: false,
-        coordinates: coordinates
-      });
+    // Update Firestore pending_spots document
+    const pendingRef = db.collection('pending_spots').doc(spotId);
+    const doc = await pendingRef.get();
+    if (!doc.exists) {
+      return NextResponse.json({ message: 'Spot not found' }, { status: 404 });
     }
 
-    // Update the spot in the database
-    const dbPath = path.join(process.cwd(), 'db.json');
-    const dbJson = await fs.readFile(dbPath, 'utf8');
-    const db = JSON.parse(dbJson);
-
-    // Find and update the spot
-    const spotIndex = db.pending_spots.findIndex(spot => spot.id === spotId);
-    
-    if (spotIndex === -1) {
-      return NextResponse.json({ 
-        message: 'Spot not found' 
-      }, { status: 404 });
-    }
-
-    // Update the spot with coordinates
-    db.pending_spots[spotIndex] = {
-      ...db.pending_spots[spotIndex],
+    await pendingRef.update({
       location: {
         lat: coordinates.lat,
         lng: coordinates.lng,
@@ -58,9 +39,8 @@ export async function POST(request) {
       geocoded_address: coordinates.address,
       geocoding_confidence: coordinates.confidence,
       geocoding_status: 'success',
-    };
-
-    await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
+      updated_at: new Date().toISOString(),
+    });
 
     return NextResponse.json({ 
       message: 'Spot geocoded successfully',

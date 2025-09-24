@@ -4,7 +4,8 @@
 import { Map, AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 
 export default function AmalaMap({ spots, selectedSpot, onMarkerClick }) {
-  const position = { lat: 6.5244, lng: 3.3792 }; // Center of Lagos
+  // Global default center (near Gulf of Guinea to show Africa/Europe/Americas reasonably)
+  const position = { lat: 0, lng: 0 };
 
   // NEW: A defensive filter to ensure we only render spots with valid locations.
   const validSpots = spots.filter(spot => 
@@ -18,7 +19,7 @@ export default function AmalaMap({ spots, selectedSpot, onMarkerClick }) {
       <div style={{ height: "60vh", width: "100%", borderRadius: '12px', overflow: 'hidden' }}>
         <Map 
           defaultCenter={position} 
-          defaultZoom={12} 
+          defaultZoom={2} 
           mapId="amala-map-id"
           gestureHandling={'greedy'}
           disableDefaultUI={true}

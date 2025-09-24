@@ -46,8 +46,17 @@ export async function POST(request) {
                 scraped_at: pendingSpotData.scraped_at,
             };
 
+            const mergeEvent = {
+                originalName: pendingSpotData.name,
+                source: pendingSpotData.source,
+                source_url: pendingSpotData.source_url,
+                merged_at: new Date().toISOString(),
+            };
+
             await targetSpotRef.update({
-                sources: admin.firestore.FieldValue.arrayUnion(newSource)
+                sources: admin.firestore.FieldValue.arrayUnion(newSource),
+                mergeHistory: admin.firestore.FieldValue.arrayUnion(mergeEvent),
+                updated_at: new Date().toISOString(),
             });
 
             await pendingSpotRef.delete();

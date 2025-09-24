@@ -4,6 +4,7 @@ export default function PendingSpotCard({ spot, onModerate }) {
   const [duplicates, setDuplicates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showMergeOptions, setShowMergeOptions] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   useEffect(() => {
     async function findDuplicates() {
@@ -24,8 +25,19 @@ export default function PendingSpotCard({ spot, onModerate }) {
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Spot Info */}
         <div className="flex-1">
-          <h3 className="text-xl font-bold text-card-foreground">{spot.name}</h3>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h3 className="text-xl font-bold text-card-foreground">{spot.name}</h3>
+            {typeof spot.confidence === 'number' && (
+              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-600 text-white">Confidence: {Math.round(spot.confidence)}%</span>
+            )}
+            {spot.source_url && (
+              <a href={spot.source_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground underline">Open source</a>
+            )}
+          </div>
           <p className="text-muted-foreground mb-2">{spot.address}</p>
+          {spot.geocoding_status === 'failed' && (
+            <p className="text-xs text-amber-600">Geocoding failed. Try manual re-geocode.</p>
+          )}
           {/* ... other spot details */}
         </div>
         
@@ -41,6 +53,36 @@ export default function PendingSpotCard({ spot, onModerate }) {
           ) : null}
           
           <button onClick={() => onModerate(spot.id, 'reject')} className="bg-red-500 text-white px-4 py-2 rounded-lg">✗ Reject</button>
+          {spot.geocoding_status === 'failed' && (
+            <button
+              onClick={async () => {
+                const manualAddress = window.prompt('Enter an address to geocode:', spot.address || '');
+                if (!manualAddress) return;
+                try {
+                  setIsGeocoding(true);
+                  const res = await fetch('/api/geocode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ spotId: spot.id, address: manualAddress })
+                  });
+                  const data = await res.json();
+                  if (!res.ok || !data.success) {
+                    alert(data.message || 'Geocoding failed');
+                  } else {
+                    alert('Geocoding updated');
+                  }
+                } catch (e) {
+                  alert('Error geocoding: ' + e.message);
+                } finally {
+                  setIsGeocoding(false);
+                }
+              }}
+              disabled={isGeocoding}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-60"
+            >
+              {isGeocoding ? 'Geocoding...' : 'Re-geocode'}
+            </button>
+          )}
         </div>
       </div>
       

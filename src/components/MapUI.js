@@ -85,7 +85,7 @@ export default function MapUI({ activeFilters, onFilterChange, onPlaceSelected, 
             No spots found for &ldquo;{activeFilters.searchQuery}&rdquo;
           </div>
           <div className="text-xs text-muted-foreground text-center mt-1">
-            💡 Try: &ldquo;Mama&apos;s Kitchen&rdquo;, &ldquo;Victoria Island&rdquo;, or &ldquo;Lagos&rdquo;
+            💡 Try: &ldquo;Mama&apos;s Kitchen&rdquo;, &ldquo;Downtown&rdquo;, or &ldquo;Toronto&rdquo;
           </div>
         </div>
       )}

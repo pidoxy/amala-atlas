@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { sources } from '@/../scripts/sources'; 
 import { findPotentialSpots } from '@/../scripts/discovery-agent';
-import { geocodeSpots, isWithinLagosBounds } from '@/../scripts/geocoding';
+import { geocodeSpots } from '@/../scripts/geocoding';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -47,15 +47,13 @@ export async function GET() {
     const uniqueNewSpots = Array.from(new Set(newSpots.map(s => s.name)))
       .map(name => newSpots.find(s => s.name === name));
 
-    // Separate spots with and without coordinates
+    // Separate spots with and without coordinates (global, no bounds restriction)
     const spotsWithCoords = uniqueNewSpots.filter(spot => 
-      spot.location && spot.location.lat && spot.location.lng && 
-      isWithinLagosBounds(spot.location.lat, spot.location.lng)
+      spot.location && spot.location.lat && spot.location.lng
     );
     
     const spotsWithoutCoords = uniqueNewSpots.filter(spot => 
-      !spot.location || !spot.location.lat || !spot.location.lng ||
-      !isWithinLagosBounds(spot.location.lat, spot.location.lng)
+      !spot.location || !spot.location.lat || !spot.location.lng
     );
 
     if (uniqueNewSpots.length > 0) {

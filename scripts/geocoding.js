@@ -8,11 +8,9 @@ export async function geocodeAddress(address) {
     
     const response = await axios.get('https://nominatim.openstreetmap.org/search', {
       params: {
-        q: `${address}, Lagos, Nigeria`,
+        q: `${address}`,
         format: 'json',
         limit: 1,
-        countrycodes: 'ng',
-        state: 'Lagos',
       },
       headers: {
         'User-Agent': 'AmalaAtlas/1.0 (Food Discovery App)',
@@ -86,17 +84,7 @@ export async function geocodeSpots(spots, delayMs = 1000) {
 }
 
 // Validate coordinates are within Lagos bounds
-export function isWithinLagosBounds(lat, lng) {
-  // Lagos approximate bounds
-  const lagosBounds = {
-    north: 6.8,
-    south: 6.2,
-    east: 3.8,
-    west: 3.0,
-  };
-  
-  return lat >= lagosBounds.south && 
-         lat <= lagosBounds.north && 
-         lng >= lagosBounds.west && 
-         lng <= lagosBounds.east;
+// Deprecated: bounds are now global; keeping a stub for backward-compat
+export function isWithinLagosBounds() {
+  return true;
 }
