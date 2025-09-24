@@ -1,6 +1,6 @@
 // File: src/app/api/geocode/route.js
 import { NextResponse } from 'next/server';
-import { geocodeAddress, isWithinLagosBounds } from '../../../../scripts/geocoding';
+import { geocodeAddress, isWithinLagosBounds } from '@/../scripts/geocoding';
 import fs from 'fs/promises';
 import path from 'path';
 

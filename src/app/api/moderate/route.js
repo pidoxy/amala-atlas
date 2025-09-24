@@ -1,54 +1,64 @@
-
-// import { NextResponse } from 'next/server';
-// import fs from 'fs/promises';
-// import path from 'path';
-
-// export async function POST(request) {
-//     const { spotId, action } = await request.json();
-//     const dbPath = path.join(process.cwd(), 'db.json');
-//     const dbJson = await fs.readFile(dbPath, 'utf8');
-//     const db = JSON.parse(dbJson);
-
-//     const spotIndex = db.pending_spots.findIndex(s => s.id === spotId);
-//     if (spotIndex === -1) {
-//         return NextResponse.json({ message: 'Spot not found' }, { status: 404 });
-//     }
-
-//     if (action === 'approve') {
-//         const [approvedSpot] = db.pending_spots.splice(spotIndex, 1);
-//         // In a real app, you'd geocode the address here to get lat/lng
-//         // For the hackathon, we'll add placeholder coordinates
-//         approvedSpot.location = { lat: 6.5244, lng: 3.3792 };
-//         approvedSpot.is_open = true; // Default value
-//         db.spots.push(approvedSpot);
-//     } else if (action === 'reject') {
-//         db.pending_spots.splice(spotIndex, 1);
-//     }
-
-//     await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
-//     return NextResponse.json({ message: 'Moderation successful' });
-// }
-
 import { NextResponse } from 'next/server';
 import { db } from '@/../firebase-admin.config';
+import admin from 'firebase-admin';
 
 export async function POST(request) {
-    const { spotId, action } = await request.json();
-    const spotRef = db.collection('pending_spots').doc(spotId);
-    const spotDoc = await spotRef.get();
+    try {
+        // Check if Firebase is properly initialized
+        if (!db) {
+            throw new Error('Firebase database not initialized. Please check your environment variables.');
+        }
 
-    if (!spotDoc.exists) {
-        return NextResponse.json({ message: 'Spot not found' }, { status: 404 });
+        const { spotId, action, mergeTargetId } = await request.json();
+        
+        if (!spotId || !action) {
+            return NextResponse.json({ message: 'spotId and action are required' }, { status: 400 });
+        }
+
+        // Validate action before checking spot existence
+        if (!['approve', 'reject', 'merge'].includes(action)) {
+            return NextResponse.json({ message: 'Invalid action. Must be approve, reject, or merge' }, { status: 400 });
+        }
+
+        const pendingSpotRef = db.collection('pending_spots').doc(spotId);
+        const pendingSpotDoc = await pendingSpotRef.get();
+
+        if (!pendingSpotDoc.exists) {
+            return NextResponse.json({ message: 'Spot not found' }, { status: 404 });
+        }
+        
+        const pendingSpotData = pendingSpotDoc.data();
+
+        if (action === 'approve') {
+            await db.collection('spots').add(pendingSpotData);
+            await pendingSpotRef.delete();
+        } else if (action === 'reject') {
+            await pendingSpotRef.delete();
+        } else if (action === 'merge') {
+            if (!mergeTargetId) {
+                return NextResponse.json({ message: 'Merge target ID is required' }, { status: 400 });
+            }
+            const targetSpotRef = db.collection('spots').doc(mergeTargetId);
+            
+            const newSource = {
+                source: pendingSpotData.source,
+                source_url: pendingSpotData.source_url,
+                scraped_at: pendingSpotData.scraped_at,
+            };
+
+            await targetSpotRef.update({
+                sources: admin.firestore.FieldValue.arrayUnion(newSource)
+            });
+
+            await pendingSpotRef.delete();
+        }
+
+        return NextResponse.json({ message: 'Moderation successful' });
+    } catch (error) {
+        console.error('[API] Moderation failed:', error);
+        return NextResponse.json({ 
+            message: 'Moderation failed', 
+            error: error.message 
+        }, { status: 500 });
     }
-
-    if (action === 'approve') {
-        const approvedSpotData = spotDoc.data();
-        approvedSpotData.location = approvedSpotData.location || { lat: 6.5244, lng: 3.3792 }; // Ensure location exists
-        await db.collection('spots').add(approvedSpotData);
-        await spotRef.delete(); // Delete from pending
-    } else if (action === 'reject') {
-        await spotRef.delete(); // Delete from pending
-    }
-
-    return NextResponse.json({ message: 'Moderation successful' });
 }

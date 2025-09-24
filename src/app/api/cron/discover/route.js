@@ -1,8 +1,8 @@
 // File: src/app/api/cron/discover/route.js
 import { NextResponse } from 'next/server';
-import { sources } from '../../../../../scripts/sources'; 
-import { findPotentialSpots } from '../../../../../scripts/discovery-agent';
-import { geocodeSpots, isWithinLagosBounds } from '../../../../../scripts/geocoding';
+import { sources } from '@/../scripts/sources'; 
+import { findPotentialSpots } from '@/../scripts/discovery-agent';
+import { geocodeSpots, isWithinLagosBounds } from '@/../scripts/geocoding';
 import fs from 'fs/promises';
 import path from 'path';
 

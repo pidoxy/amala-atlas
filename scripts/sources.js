@@ -1,6 +1,81 @@
 // File: /scripts/sources.js
 
 export const sources = [
+  {
+    name: 'Houstonia Mag (Houston, USA)',
+    url: 'https://www.houstoniamag.com/eat-and-drink/2022/11/nigerian-food-houston-restaurants',
+    scraperConfig: {
+      container: 'article', 
+      nameSelector: 'h2',
+      addressSelector: 'blockquote',
+    }
+  },
+  {
+    name: 'The African Dream (Maryland, USA)',
+    url: 'https://theafricandream.net/top-8-nigerian-restaurants-in-maryland-usa/',
+    scraperConfig: {
+      container: '.tdb-block-inner',
+      nameSelector: 'h3',
+      addressSelector: 'p',
+    }
+  },
+  {
+    name: 'Tastes of Nigeria (Toronto, CA)',
+    url: 'https://www.tastesofnigeria.com/nigerian-restaurants-in-toronto/',
+    scraperConfig: {
+      container: '.post-content',
+      nameSelector: 'h3',
+      addressSelector: 'p',
+    }
+  },
+  {
+    name: 'Secret Atlanta (Atlanta, USA)',
+    url: 'https://secretatlanta.co/nigerian-restaurants-atlanta/',
+    scraperConfig: {
+        container: 'article',
+        nameSelector: 'h2',
+        addressSelector: 'p'
+    }
+  },
+  // =========== Europe ===========
+  {
+    name: 'Afrobuy (London, UK)',
+    url: 'https://www.afrobuy.co.uk/blogs/news/top-5-nigerian-restaurants-in-london-for-amala-lovers',
+    scraperConfig: {
+      container: 'article.article-template',
+      nameSelector: 'h3',
+      addressSelector: 'p',
+    }
+  },
+  {
+    name: 'Nigerian Food in London',
+    url: 'https://www.londonsfirstnigerian.co.uk/post/top-5-amala-spots-in-london',
+    scraperConfig: {
+      container: '.blog-post-content-wrapper',
+      nameSelector: 'h3',
+      addressSelector: 'p',
+    }
+  },
+  // =========== Asia ===========
+  {
+    name: 'IdrisBello.com (Tokyo, Japan)',
+    url: 'https://idrisbello.com/amala-in-japan/',
+    cacheFile: 'idrisbello.html', // This one is tricky, so a cache is good
+    scraperConfig: {
+      container: '.entry-content', 
+      nameSelector: 'p strong', // Name is inside a <strong> tag within a <p>
+      addressSelector: 'p',
+    }
+  },
+  {
+    name: 'WillGiveYouRecipes (London)',
+    url: 'https://willgiveyourecipes.com/best-nigerian-amala-spots-in-london/',
+    scraperConfig: {
+      container: '.entry-content',
+      nameSelector: 'h3',
+      addressSelector: 'p',
+    }
+  },
     {
       name: 'EatDrinkLagos',
       url: 'https://www.eatdrinklagos.com/the-eatdrinklagos-guide-to-amala-in-lagos/',
