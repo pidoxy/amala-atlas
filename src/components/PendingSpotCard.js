@@ -43,16 +43,16 @@ export default function PendingSpotCard({ spot, onModerate }) {
         
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-2 lg:ml-4">
-          <button onClick={() => onModerate(spot.id, 'approve')} className="bg-green-500 text-white px-4 py-2 rounded-lg">✓ Approve</button>
+          <button onClick={() => onModerate(spot.id, 'approve')} className="bg-green-500 text-white px-4 py-2 rounded-lg" aria-label={`Approve ${spot.name}`}>✓ Approve</button>
           
           {/* DUPLICATE/MERGE BUTTON */}
           {isLoading ? (
             <button className="bg-gray-400 text-white px-4 py-2 rounded-lg" disabled>Checking...</button>
           ) : duplicates.length > 0 ? (
-            <button onClick={() => setShowMergeOptions(!showMergeOptions)} className="bg-amber-500 text-white px-4 py-2 rounded-lg">Merge ({duplicates.length})</button>
+            <button onClick={() => setShowMergeOptions(!showMergeOptions)} className="bg-amber-500 text-white px-4 py-2 rounded-lg" aria-expanded={showMergeOptions} aria-controls={`merge-options-${spot.id}`}>Merge ({duplicates.length})</button>
           ) : null}
           
-          <button onClick={() => onModerate(spot.id, 'reject')} className="bg-red-500 text-white px-4 py-2 rounded-lg">✗ Reject</button>
+          <button onClick={() => onModerate(spot.id, 'reject')} className="bg-red-500 text-white px-4 py-2 rounded-lg" aria-label={`Reject ${spot.name}`}>✗ Reject</button>
           {spot.geocoding_status === 'failed' && (
             <button
               onClick={async () => {
@@ -88,7 +88,7 @@ export default function PendingSpotCard({ spot, onModerate }) {
       
       {/* MERGE OPTIONS DROPDOWN */}
       {showMergeOptions && (
-        <div className="mt-4 p-4 border-t border-border">
+        <div id={`merge-options-${spot.id}`} className="mt-4 p-4 border-t border-border" role="region" aria-label="Merge options">
           <h4 className="font-bold mb-2">Select a spot to merge with:</h4>
           <div className="space-y-2">
             {duplicates.map(dup => (

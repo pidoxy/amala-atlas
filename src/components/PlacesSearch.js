@@ -41,17 +41,23 @@ export default function PlacesSearch({ onPlaceSelected }) {
 
   return (
     <div className="relative">
+      <label htmlFor="places-search" className="sr-only">Search places</label>
       <input
+        id="places-search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         disabled={!ready}
         placeholder="Find Amala near you"
         className="w-full px-3 py-2 bg-background text-foreground border border-input rounded-md focus:ring-2 focus:ring-ring"
+        role="combobox"
+        aria-expanded={status === 'OK'}
+        aria-controls="places-suggestions"
+        aria-autocomplete="list"
       />
       {status === 'OK' && (
-        <ul className="absolute z-10 w-full bg-card border border-border rounded-md shadow-lg mt-1">
+        <ul id="places-suggestions" role="listbox" className="absolute z-10 w-full bg-card border border-border rounded-md shadow-lg mt-1">
           {data.map(({ place_id, description }) => (
-            <li key={place_id} onClick={() => handleSelect(description)} className="px-4 py-2 cursor-pointer hover:bg-accent">
+            <li role="option" key={place_id} onClick={() => handleSelect(description)} className="px-4 py-2 cursor-pointer hover:bg-accent">
               {description}
             </li>
           ))}

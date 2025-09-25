@@ -21,6 +21,8 @@ export default function UserProfile({ user, reviews, stats }) {
               width={64}
               height={64}
               className="rounded-full"
+              sizes="64px"
+              loading="lazy"
             />
             <div>
               <h1 className="text-2xl font-bold text-card-foreground">{user.name}</h1>

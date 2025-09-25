@@ -39,6 +39,8 @@ export default function AuthButton() {
             width={32}
             height={32}
             className="rounded-full flex-shrink-0"
+            sizes="32px"
+            loading="lazy"
           />
           <span className="hidden sm:inline truncate max-w-32">{session.user.name}</span>
         </Link>

@@ -17,12 +17,15 @@ export default function MapUI({ activeFilters, onFilterChange, onPlaceSelected, 
       
       {/* Unified Search Input */}
       <div className="relative">
+        <label htmlFor="search-spots" className="sr-only">Search spots</label>
         <input 
+          id="search-spots"
           type="text" 
           placeholder="Search spots by name, address, or location..." 
           value={activeFilters.searchQuery || ''}
           onChange={(e) => onFilterChange('searchQuery', e.target.value)}
           className="w-full pl-10 pr-10 py-2 bg-background text-foreground border border-input rounded-md focus:ring-2 focus:ring-ring focus:border-ring transition-all duration-200 placeholder:text-muted-foreground"
+          aria-label="Search spots by name, address, or location"
         />
         {activeFilters.searchQuery && (
           <button
@@ -41,7 +44,7 @@ export default function MapUI({ activeFilters, onFilterChange, onPlaceSelected, 
 
       {/* Search results dropdown */}
       {activeFilters.searchQuery && filteredSpots.length > 0 && (
-        <div className="mt-2 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <div className="mt-2 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto" aria-live="polite">
           <div className="p-2 text-xs text-muted-foreground border-b border-border">
             Found {filteredSpots.length} spot{filteredSpots.length === 1 ? '' : 's'}
           </div>
@@ -80,7 +83,7 @@ export default function MapUI({ activeFilters, onFilterChange, onPlaceSelected, 
 
       {/* No results message */}
       {activeFilters.searchQuery && filteredSpots.length === 0 && (
-        <div className="mt-2 p-3 bg-muted/50 rounded-md">
+        <div className="mt-2 p-3 bg-muted/50 rounded-md" aria-live="polite">
           <div className="text-sm text-muted-foreground text-center">
             No spots found for &ldquo;{activeFilters.searchQuery}&rdquo;
           </div>
@@ -115,6 +118,7 @@ export default function MapUI({ activeFilters, onFilterChange, onPlaceSelected, 
               ? 'bg-primary text-primary-foreground shadow-md' 
               : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-sm'
           }`}
+          aria-pressed={activeFilters.openNow}
         >
           {activeFilters.openNow ? '✓' : ''} Open Now
         </button>
@@ -125,6 +129,7 @@ export default function MapUI({ activeFilters, onFilterChange, onPlaceSelected, 
               ? 'bg-primary text-primary-foreground shadow-md' 
               : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-sm'
           }`}
+          aria-pressed={activeFilters.serviceTypes.includes('dine-in')}
         >
           {activeFilters.serviceTypes.includes('dine-in') ? '✓' : ''} Dine-in
         </button>
@@ -135,6 +140,7 @@ export default function MapUI({ activeFilters, onFilterChange, onPlaceSelected, 
               ? 'bg-primary text-primary-foreground shadow-md' 
               : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-sm'
           }`}
+          aria-pressed={activeFilters.serviceTypes.includes('takeaway')}
         >
           {activeFilters.serviceTypes.includes('takeaway') ? '✓' : ''} Takeaway
         </button>

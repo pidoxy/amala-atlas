@@ -15,8 +15,7 @@ export default function AmalaMap({ spots, selectedSpot, onMarkerClick }) {
   );
 
   return (
-
-      <div style={{ height: "60vh", width: "100%", borderRadius: '12px', overflow: 'hidden' }}>
+      <div style={{ height: "420px", width: "100%", borderRadius: '12px', overflow: 'hidden' }} role="region" aria-label="Map showing Amala spots">
         <Map 
           defaultCenter={position} 
           defaultZoom={2} 

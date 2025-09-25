@@ -63,6 +63,8 @@ export default function ReviewCard({ review }) {
             alt={review.user_name}
             fill
             className="rounded-full object-cover"
+            sizes="40px"
+            loading="lazy"
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -93,6 +95,8 @@ export default function ReviewCard({ review }) {
             alt="Review photo"
             fill
             className="object-cover"
+            sizes="(max-width: 640px) 100vw, 50vw"
+            loading="lazy"
           />
         </div>
       )}

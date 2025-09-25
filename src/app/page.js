@@ -1,15 +1,26 @@
 // File: src/app/page.js
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import AmalaMap from '../components/Map';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import SpotDetails from '../components/SpotDetails';
 import ThemeToggle from '../components/ThemeToggle';
 import AuthButton from '../components/AuthButton';
-import { APIProvider } from '@vis.gl/react-google-maps';
-import MapUI from '../components/MapUI'; // <-- IMPORT THE NEW WRAPPER
+
+// Lazy-load heavy map-related modules on the client only
+const APIProvider = dynamic(
+  () => import('@vis.gl/react-google-maps').then((m) => m.APIProvider),
+  { ssr: false }
+);
+const AmalaMap = dynamic(() => import('../components/Map'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[420px] rounded-xl border border-border bg-muted animate-pulse" />
+  ),
+});
+const MapUI = dynamic(() => import('../components/MapUI'), { ssr: false });
 
 export default function HomePage() {
   const [spots, setSpots] = useState([]);
@@ -204,13 +215,29 @@ export default function HomePage() {
     setActiveFilters(prev => ({ ...prev, searchQuery: '' }));
   };
 
+  // Defer map mounting until in viewport
+  const mapContainerRef = useRef(null);
+  const [isMapInView, setIsMapInView] = useState(false);
+
+  useEffect(() => {
+    const node = mapContainerRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          setIsMapInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px 0px', threshold: 0.01 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    // WRAP EVERYTHING IN THE APIPROVIDER TO GIVE THE SEARCH BAR AND MAP ACCESS
-    <APIProvider 
-      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY} 
-      libraries={['places']}
-    >
-      <main className="container mx-auto px-4 py-8 bg-background text-foreground min-h-screen">
+    <main className="container mx-auto px-4 py-8 bg-background text-foreground min-h-screen">
         {/* Header */}
         <header className="flex justify-between items-center mb-6 flex-wrap gap-4">
           <div className="flex items-center gap-2">
@@ -220,6 +247,7 @@ export default function HomePage() {
                 alt="Amala Atlas"
                 fill
                 className="object-contain dark:hidden"
+                sizes="32px"
                 priority
               />
               <Image
@@ -227,6 +255,7 @@ export default function HomePage() {
                 alt="Amala Atlas"
                 fill
                 className="object-contain hidden dark:block"
+                sizes="32px"
                 priority
               />
             </div>
@@ -240,21 +269,27 @@ export default function HomePage() {
             </Link>
           </div>
         </header>
-        
-        <div className="relative mb-6">
-        <AmalaMap 
-            spots={filteredSpots} 
-            selectedSpot={selectedSpot}
-            onMarkerClick={setSelectedSpot} 
-          />
-          <MapUI 
-            activeFilters={activeFilters}
-            onFilterChange={handleFilterChange}
-            onPlaceSelected={handlePlaceSelected}
-            onSpotSelect={handleSpotSelect}
-            totalSpots={spots.length}
-            filteredSpots={filteredSpots}
-          />
+
+        <div className="relative mb-6" ref={mapContainerRef}>
+          {isMapInView ? (
+            <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY} libraries={['places']}>
+              <AmalaMap
+                spots={filteredSpots}
+                selectedSpot={selectedSpot}
+                onMarkerClick={setSelectedSpot}
+              />
+              <MapUI
+                activeFilters={activeFilters}
+                onFilterChange={handleFilterChange}
+                onPlaceSelected={handlePlaceSelected}
+                onSpotSelect={handleSpotSelect}
+                totalSpots={spots.length}
+                filteredSpots={filteredSpots}
+              />
+            </APIProvider>
+          ) : (
+            <div className="w-full h-[420px] rounded-xl border border-border bg-muted animate-pulse" />
+          )}
         </div>
 
          {/* Conditionally render details or a "not found" message */}
@@ -280,6 +315,5 @@ export default function HomePage() {
            </div>
          )}
       </main>
-    </APIProvider>
   );
 }

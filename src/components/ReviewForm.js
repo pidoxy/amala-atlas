@@ -139,7 +139,7 @@ export default function ReviewForm({ spotId, onReviewSubmitted }) {
           <label className="block text-sm font-medium text-card-foreground mb-2">
             Rating *
           </label>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1" role="radiogroup" aria-label="Rating">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
@@ -148,6 +148,9 @@ export default function ReviewForm({ spotId, onReviewSubmitted }) {
                 onMouseEnter={() => setHoveredRating(star)}
                 onMouseLeave={() => setHoveredRating(0)}
                 className="star-rating text-2xl focus:outline-none hover:scale-110 transition-transform"
+                role="radio"
+                aria-checked={rating === star}
+                aria-label={`${star} star${star > 1 ? 's' : ''}`}
               >
                 <span
                   className={`${

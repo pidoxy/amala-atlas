@@ -75,8 +75,9 @@ export default function SpotDetails({ spot }) {
         <Image 
           src={spot.image_url || placeholderImage}
           alt={`Photo of ${spot.name}`}
-          layout="fill"
-          objectFit="cover"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 50vw"
         />
       </div>
     </div>
