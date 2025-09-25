@@ -59,7 +59,7 @@ export default function ReviewCard({ review }) {
       <div className="flex items-center space-x-3">
         <div className="relative w-10 h-10">
           <Image
-            src={review.user_image || '/default-avatar.png'}
+            src={review.user_image || '/logo.png'}
             alt={review.user_name}
             fill
             className="rounded-full object-cover"

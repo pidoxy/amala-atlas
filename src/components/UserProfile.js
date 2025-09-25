@@ -16,7 +16,7 @@ export default function UserProfile({ user, reviews, stats }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Image
-              src={user.image || '/default-avatar.png'}
+              src={user.image || '/logo.png'}
               alt={user.name}
               width={64}
               height={64}

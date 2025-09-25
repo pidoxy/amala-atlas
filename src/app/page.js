@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import AmalaMap from '../components/Map';
 import Link from 'next/link';
 import SpotDetails from '../components/SpotDetails';
@@ -212,7 +213,25 @@ export default function HomePage() {
       <main className="container mx-auto px-4 py-8 bg-background text-foreground min-h-screen">
         {/* Header */}
         <header className="flex justify-between items-center mb-6 flex-wrap gap-4">
-          <h1 className="text-3xl font-bold text-foreground">Amala Atlas</h1>
+          <div className="flex items-center gap-2">
+            <div className="relative w-8 h-8">
+              <Image
+                src="/logo_dark.png" // dark text logo for light mode
+                alt="Amala Atlas"
+                fill
+                className="object-contain dark:hidden"
+                priority
+              />
+              <Image
+                src="/logo.png" // white logo for dark mode
+                alt="Amala Atlas"
+                fill
+                className="object-contain hidden dark:block"
+                priority
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">Amala Atlas</h1>
+          </div>
           <div className="flex items-center gap-3 flex-wrap">
             <ThemeToggle />
             <AuthButton />

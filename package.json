@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@auth/firebase-adapter": "^2.10.0",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@types/multer": "^2.0.0",
     "@vis.gl/react-google-maps": "^1.5.5",
     "axios": "^1.12.1",

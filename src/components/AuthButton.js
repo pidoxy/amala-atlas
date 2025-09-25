@@ -34,7 +34,7 @@ export default function AuthButton() {
           className="flex items-center gap-2 text-foreground hover:text-primary transition-colors min-w-0"
         >
           <Image
-            src={session.user.image || '/default-avatar.png'}
+            src={session.user.image || '/logo.png'}
             alt={session.user.name}
             width={32}
             height={32}
