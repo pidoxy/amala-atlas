@@ -28,9 +28,36 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/../firebase-admin.config';
+import { geocodeAddress } from '@/../scripts/geocoding';
 
 export async function POST(request) {
-    const newSpot = await request.json();
-    await db.collection('pending_spots').add(newSpot);
-    return NextResponse.json({ message: 'Submission successful!' });
+    try {
+        const newSpot = await request.json();
+
+        // Best-effort geocoding so the spot can appear on the map later
+        let enriched = { ...newSpot };
+        if (newSpot.address && (!newSpot.location || !newSpot.location.lat || !newSpot.location.lng)) {
+            const coords = await geocodeAddress(newSpot.address);
+            if (coords) {
+                enriched = {
+                    ...enriched,
+                    location: { lat: coords.lat, lng: coords.lng },
+                    geocoded_address: coords.address,
+                    geocoding_confidence: coords.confidence,
+                    geocoding_status: 'success',
+                };
+            } else {
+                enriched = { ...enriched, geocoding_status: 'failed' };
+            }
+        }
+
+        await db.collection('pending_spots').add({
+            ...enriched,
+            created_at: new Date().toISOString(),
+        });
+        return NextResponse.json({ message: 'Submission successful!' });
+    } catch (e) {
+        console.error('[API] submit failed:', e);
+        return NextResponse.json({ message: 'Submission failed', error: e.message }, { status: 500 });
+    }
 }

@@ -34,7 +34,12 @@ function stripListPrefix(str) {
 
 function isLikelyName(text) {
     const t = normalize(text);
-    return NAME_KEYWORDS.some(k => t.includes(k)) && t.length <= 80;
+    // Exclude listicle and meta phrases
+    if (/^(top|best|finding|guide|categories|tags)\b/.test(t)) return false;
+    // Avoid very long titles or sentences
+    if (t.length > 80 || /\.$/.test(t)) return false;
+    // Must include a food/name keyword
+    return NAME_KEYWORDS.some(k => t.includes(k));
 }
 
 function findBestAddress($, element, scraperConfig) {
@@ -66,7 +71,10 @@ function findBestAddress($, element, scraperConfig) {
 function validateAddress(address) {
     if (!address || address.length < 10) return false;
     const lower = normalize(address);
-    return lower.includes(',') || /\d/.test(lower) || ADDRESS_KEYWORDS.some(k => lower.includes(k));
+    // Require at least a comma or a number and a street/city hint
+    const hasPunctuationOrNumber = lower.includes(',') || /\d/.test(lower);
+    const hasAddrToken = ADDRESS_KEYWORDS.some(k => lower.includes(k));
+    return hasPunctuationOrNumber && hasAddrToken;
 }
 
 function computeConfidence({ name, context, hasAddress, sourceName }) {
@@ -145,7 +153,8 @@ export async function findPotentialSpots(source) {
                 hasAddress: true,
                 sourceName: source.name,
             });
-            if (confidence < 50) return;
+            // Stricter threshold
+            if (confidence < 70) return;
 
             candidates.push({
                 name: potentialName,

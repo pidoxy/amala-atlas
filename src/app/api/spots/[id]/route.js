@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/../firebase-admin.config';
 
 export async function GET(request, { params }) {
-  const { id } = params; // Get the ID from the URL
+  const { id } = await params; // Get the ID from the URL
 
   try {
     // Fetch spot from Firestore

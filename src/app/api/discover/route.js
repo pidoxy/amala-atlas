@@ -4,6 +4,44 @@ import { sources } from '../../../../scripts/sources';
 import { findPotentialSpots } from '../../../../scripts/discovery-agent';
 import { geocodeSpots } from '../../../../scripts/geocoding';
 
+function normalizeName(name = '') {
+  return (name || '')
+    .toLowerCase()
+    .replace(/\b(restaurant|spot|joint|canteen|grill|place)\b/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function extractCityToken(address = '') {
+  if (!address) return '';
+  const lower = address.toLowerCase();
+  // pick last token after comma as a naive city/area heuristic
+  const parts = lower.split(',').map(p => p.trim()).filter(Boolean);
+  const candidate = parts.length > 0 ? parts[parts.length - 1] : lower;
+  // keep only letters/spaces
+  return candidate.replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+async function resolveCityToken(address = '') {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (!apiKey || !address) return extractCityToken(address);
+  try {
+    const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
+    url.searchParams.set('address', address);
+    url.searchParams.set('key', apiKey);
+    const res = await fetch(url.toString(), { cache: 'no-store' });
+    const data = await res.json();
+    const comp = data?.results?.[0]?.address_components || [];
+    const get = (type) => comp.find(c => c.types.includes(type))?.long_name || '';
+    // Prefer locality, then sublocality, then admin area level 2/1
+    const token = get('locality') || get('sublocality') || get('administrative_area_level_2') || get('administrative_area_level_1');
+    return (token || extractCityToken(address)).toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  } catch {
+    return extractCityToken(address);
+  }
+}
+
 export async function POST() {
   console.log('--- [API] Discover Endpoint Triggered ---');
   
@@ -25,23 +63,66 @@ export async function POST() {
       return NextResponse.json({ message: 'Discovery ran, but no new raw candidates were found.', count: 0 });
     }
 
-    // 2. DE-DUPLICATE
+    // 2. DE-DUPLICATE (including previously rejected)
     const spotsPromise = db.collection('spots').select('name').get();
-    const pendingSpotsPromise = db.collection('pending_spots').select('name').get();
-    const [spotsSnapshot, pendingSpotsSnapshot] = await Promise.all([spotsPromise, pendingSpotsPromise]);
+    const pendingSpotsPromise = db.collection('pending_spots').select('name', 'address', 'location').get();
+    const rejectedPromise = db.collection('rejected_sources').select('name', 'address').get();
+    const [spotsSnapshot, pendingSpotsSnapshot, rejectedSnapshot] = await Promise.all([spotsPromise, pendingSpotsPromise, rejectedPromise]);
     
-    const allExistingNames = new Set([
-      ...spotsSnapshot.docs.map(doc => doc.data().name.toLowerCase()),
-      ...pendingSpotsSnapshot.docs.map(doc => doc.data().name.toLowerCase())
+    const allExistingKeys = new Set([
+      ...spotsSnapshot.docs.map(doc => {
+        const d = doc.data();
+        return `${normalizeName(d.name)}::${extractCityToken(d.address)}`;
+      }),
+      ...pendingSpotsSnapshot.docs.map(doc => {
+        const d = doc.data();
+        return `${normalizeName(d.name)}::${extractCityToken(d.address)}`;
+      }),
+      ...rejectedSnapshot.docs.map(doc => {
+        const d = doc.data();
+        return `${normalizeName(d.name)}::${extractCityToken(d.address)}`;
+      }),
     ]);
     
-    const newSpots = allPotentialSpots.filter(spot => !allExistingNames.has(spot.name.toLowerCase()));
-    const uniqueNewSpots = Array.from(new Set(newSpots.map(s => s.name)))
-      .map(name => newSpots.find(s => s.name === name));
+    // Resolve robust city tokens for candidates (Google when available)
+    const candidateCityTokens = await Promise.all(
+      allPotentialSpots.map(s => resolveCityToken(s.address || ''))
+    );
+
+    const newSpots = allPotentialSpots.filter((spot, idx) => {
+      const key = `${normalizeName(spot.name)}::${candidateCityTokens[idx]}`;
+      return !allExistingKeys.has(key);
+    });
+    const duplicateCandidates = allPotentialSpots.filter((spot, idx) => {
+      const key = `${normalizeName(spot.name)}::${candidateCityTokens[idx]}`;
+      return allExistingKeys.has(key);
+    });
+    const uniqueNewSpots = Array.from(new Set(newSpots.map(s => (s.name || '').toLowerCase())))
+      .map(name => newSpots.find(s => (s.name || '').toLowerCase() === name));
     console.log(`[API] STEP 2/5: De-duplication complete. Found ${uniqueNewSpots.length} unique new spots.`);
 
     if (uniqueNewSpots.length === 0) {
-      return NextResponse.json({ message: 'Discovery found spots, but they already exist in the database.', count: 0 });
+      // Mark duplicates in pending queue so moderators can quickly reject
+      if (duplicateCandidates.length > 0) {
+        const batch = db.batch();
+        duplicateCandidates.slice(0, 50).forEach(spot => {
+          const docRef = db.collection('pending_spots').doc();
+          batch.set(docRef, {
+            name: spot.name,
+            address: spot.address || '',
+            description: spot.description || '',
+            image_url: spot.image_url || '',
+            status: 'duplicate',
+            duplicate_reason: 'already_exists',
+            source: spot.source,
+            source_url: spot.source_url,
+            scraped_at: spot.scraped_at,
+            created_at: new Date().toISOString(),
+          });
+        });
+        await batch.commit();
+      }
+      return NextResponse.json({ message: 'Discovery found spots, but they already exist in the database.', count: 0, duplicates_marked: duplicateCandidates.length });
     }
 
     // 3. GEOCODE

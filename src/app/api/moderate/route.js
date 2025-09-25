@@ -33,6 +33,20 @@ export async function POST(request) {
             await db.collection('spots').add(pendingSpotData);
             await pendingSpotRef.delete();
         } else if (action === 'reject') {
+            // Record the rejection so discovery doesn't resurface the same junk again
+            const rejectionRecord = {
+                name: pendingSpotData.name || '',
+                address: pendingSpotData.address || '',
+                source: pendingSpotData.source || '',
+                source_url: pendingSpotData.source_url || '',
+                reason: 'moderator_reject',
+                created_at: new Date().toISOString(),
+            };
+            try {
+                await db.collection('rejected_sources').add(rejectionRecord);
+            } catch (e) {
+                console.error('[API] Failed to record rejection:', e);
+            }
             await pendingSpotRef.delete();
         } else if (action === 'merge') {
             if (!mergeTargetId) {

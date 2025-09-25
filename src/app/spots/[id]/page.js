@@ -18,7 +18,8 @@ async function getSpotDetails(id) {
 }
 
 export default async function SpotDetailsPage({ params }) {
-  const spot = await getSpotDetails(params.id);
+  const { id } = await params;
+  const spot = await getSpotDetails(id);
 
   if (!spot) {
     return (
@@ -44,6 +45,7 @@ export default async function SpotDetailsPage({ params }) {
   }
 
   const placeholderImage = "https://i.imgur.com/gO0wOJG.jpg";
+  const coords = spot.location || spot.coordinates || null;
 
   return (
     <div className="bg-background min-h-screen">
@@ -76,6 +78,23 @@ export default async function SpotDetailsPage({ params }) {
               <h2 className="font-bold text-secondary-foreground mb-1">Hours</h2>
               <p className="text-muted-foreground">{spot.hours || 'Open daily, 11 AM – 10 PM'}</p>
             </div>
+
+            {coords && typeof coords.lat === 'number' && typeof coords.lng === 'number' && (
+              <div className="p-4 bg-secondary rounded-lg">
+                <h2 className="font-bold text-secondary-foreground mb-1">Coordinates</h2>
+                <p className="text-muted-foreground select-all">
+                  {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+                </p>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-sm text-primary hover:underline"
+                >
+                  Open in Google Maps
+                </a>
+              </div>
+            )}
             
             {/* Get Directions Button */}
             <a 

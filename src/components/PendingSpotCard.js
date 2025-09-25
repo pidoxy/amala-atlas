@@ -30,11 +30,23 @@ export default function PendingSpotCard({ spot, onModerate }) {
             {typeof spot.confidence === 'number' && (
               <span className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-600 text-white">Confidence: {Math.round(spot.confidence)}%</span>
             )}
+            {spot.status === 'duplicate' && (
+              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-amber-600 text-white">Duplicate</span>
+            )}
             {spot.source_url && (
               <a href={spot.source_url} target="_blank" rel="noreferrer" className="text-xs px-2 py-1 rounded-full bg-secondary text-secondary-foreground underline">Open source</a>
             )}
           </div>
-          <p className="text-muted-foreground mb-2">{spot.address}</p>
+          {spot.address && (
+            <p className="text-muted-foreground mb-2">
+              {spot.address.length > 140 ? `${spot.address.slice(0, 140)}…` : spot.address}
+            </p>
+          )}
+          {spot.location && typeof spot.location.lat === 'number' && typeof spot.location.lng === 'number' && (
+            <p className="text-xs text-muted-foreground mb-2 select-all">
+              Coords: {spot.location.lat.toFixed(6)}, {spot.location.lng.toFixed(6)}
+            </p>
+          )}
           {spot.geocoding_status === 'failed' && (
             <p className="text-xs text-amber-600">Geocoding failed. Try manual re-geocode.</p>
           )}
@@ -53,6 +65,9 @@ export default function PendingSpotCard({ spot, onModerate }) {
           ) : null}
           
           <button onClick={() => onModerate(spot.id, 'reject')} className="bg-red-500 text-white px-4 py-2 rounded-lg" aria-label={`Reject ${spot.name}`}>✗ Reject</button>
+          {spot.status === 'duplicate' && (
+            <button onClick={() => onModerate(spot.id, 'reject')} className="bg-red-700 text-white px-4 py-2 rounded-lg" aria-label={`Reject duplicate ${spot.name}`}>Reject Duplicate</button>
+          )}
           {spot.geocoding_status === 'failed' && (
             <button
               onClick={async () => {
