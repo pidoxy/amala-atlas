@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://amala-atlas-oon3.vercel.app'),
   title: "Amala Atlas",
   description: "Discover the best amala spots around the world",
   icons: {
@@ -29,14 +30,14 @@ export const metadata = {
     siteName: "Amala Atlas",
     type: "website",
     images: [
-      { url: "/logo_dark.png", width: 512, height: 512, alt: "Amala Atlas" },
+      { url: "/logo_dark.png?v=2", width: 1200, height: 630, alt: "Amala Atlas" },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Amala Atlas",
     description: "Discover the best amala spots around the world",
-    images: ["/logo_dark.png"],
+    images: ["/logo_dark.png?v=2"],
   },
 };
 
